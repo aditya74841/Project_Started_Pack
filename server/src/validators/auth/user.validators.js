@@ -35,16 +35,9 @@ const userRegisterStaffValidator = () => {
       .isEmail()
       .withMessage("Email is invalid"),
     body("password")
-      .optional()
       .trim()
       .notEmpty()
       .withMessage("Password is required"),
-    body("phoneNumber")
-      .trim()
-      .notEmpty()
-      .withMessage("Phone number is required")
-      .isMobilePhone()
-      .withMessage("Phone number is invalid"),
     body("storeId").trim().notEmpty().withMessage("Store Id is required"),
   ];
 };

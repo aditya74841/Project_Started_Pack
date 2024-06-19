@@ -39,12 +39,16 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role, phoneNumber } = req.body;
+  const { name, email, password, role, phoneNumber = null } = req.body;
 
   // console.log("Checking console on registerUser Controller");
 
+  // const existedUser = await User.findOne({
+  //   $or: [{ phoneNumber }, { email }],
+  // });
+
   const existedUser = await User.findOne({
-    $or: [{ phoneNumber }, { email }],
+    email,
   });
 
   if (existedUser) {
@@ -56,7 +60,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     username: email?.split(`@`)[0],
-    phoneNumber,
+    phoneNumber: phoneNumber || null,
     isEmailVerified: false,
     role: role || UserRolesEnum.USER,
   });
@@ -498,6 +502,7 @@ const handleSocialLogin = asyncHandler(async (req, res) => {
     .redirect(
       // redirect user to the frontend with access and refresh token in case user is not using cookies
       `${process.env.CLIENT_SSO_REDIRECT_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`
+      // `${process.env.CLIENT_SSO_REDIRECT_URL}`
     );
 });
 
