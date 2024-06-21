@@ -329,36 +329,46 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User does not exists", []);
   }
 
+  if (user.loginType !== "EMAIL_PASSWORD") {
+    throw new ApiError(
+      404,
+      "Your Are Login with different method So you are Not Allowed",
+      []
+    );
+  }
+
   // Generate a temporary token
   const { unHashedToken, hashedToken, tokenExpiry } =
     user.generateTemporaryToken(); // generate password reset creds
-
+  const randomPassword = generateRandomPassword();
   // save the hashed version a of the token and expiry in the DB
   user.forgotPasswordToken = hashedToken;
   user.forgotPasswordExpiry = tokenExpiry;
+  user.password = randomPassword;
   await user.save({ validateBeforeSave: false });
 
   // Send mail with the password reset link. It should be the link of the frontend url with token
-  await sendEmail({
-    email: user?.email,
-    subject: "Password reset request",
-    mailgenContent: forgotPasswordMailgenContent(
-      user.username,
-      // * Ideally take the url from the .env file which should be teh url of the frontend
-      `${req.protocol}://${req.get(
-        "host"
-      )}/api/v1/users/reset-password/${unHashedToken}`
-    ),
+  // await sendEmail({
+  //   email: user?.email,
+  //   subject: "Password reset request",
+  //   mailgenContent: forgotPasswordMailgenContent(
+  //     user.username,
+  //     // * Ideally take the url from the .env file which should be teh url of the frontend
+  //     `${req.protocol}://${req.get(
+  //       "host"
+  //     )}/api/v1/users/reset-password/${unHashedToken}`
+  //   ),
+  // });
+
+  await sendPlainTextEmail({
+    email: user.email,
+    subject: "Your Temporary Password",
+    mailgenContent: `Hello ${user.name || "user"},\n\nYour temporary password is: ${randomPassword}\n\nPlease use this password to login and change it after your first login.\n\nThank you,\nThe Admin Team`,
   });
+
   return res
     .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        {},
-        "Password reset mail has been sent on your mail id"
-      )
-    );
+    .json(new ApiResponse(200, {}, "Random Password is sent to your mail ID"));
 });
 
 const resetForgottenPassword = asyncHandler(async (req, res) => {

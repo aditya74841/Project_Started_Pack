@@ -2,10 +2,13 @@
 import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { handleLogout } from "./(auth)/auth/store";
+import { useDispatch } from "react-redux";
+import { showMessage } from "./utils/Message";
 
 export default function Home() {
   const router = useRouter();
-
+  const dispatch = useDispatch();
   // const handleGoogleLogin = async () => {
   //   try {
   //     const postData = {
@@ -14,10 +17,6 @@ export default function Home() {
   //       password: "123456",
   //       phoneNumber: 4589785555,
   //     };
-
-
-      
-
 
   //     // const response = await axios.get(
   //     //   "http://localhost:8080/api/v1/users/google/callback",
@@ -41,19 +40,29 @@ export default function Home() {
   //   }
   // };
 
-
-  const handleGoogleLogin = () => {
+  const handleUserLogout = () => {
     // Redirect to backend to initiate Google OAuth flow
-    window.location.href = "http://localhost:8080/api/v1/users/google";
+    // window.location.href = "http://localhost:8080/api/v1/users/google";
+
+    dispatch(
+      handleLogout((error, response) => {
+        if (error) {
+          showMessage(error.response.data.message, "error");
+        } else {
+          showMessage(response.message);
+          router.push("/auth");
+        }
+      })
+    );
   };
   return (
     <>
       <button
         onClick={() => {
-          handleGoogleLogin();
+          handleUserLogout();
         }}
       >
-        Google Login
+        handleLogout
       </button>
     </>
   );

@@ -85,7 +85,7 @@ const sendPlainTextEmail = async (options) => {
 
   // Construct the email object with only plain text content
   const mail = {
-    from: { name: "CNC AUDIT", address: process.env.MAILTRAP_SMTP_USER },
+    from: { name: "START PROJECT", address: process.env.MAILTRAP_SMTP_USER },
     to: options.email,
     subject: options.subject,
     text: options.mailgenContent, // Send only plain text content

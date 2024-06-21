@@ -4,38 +4,27 @@ import React, { useEffect, useState } from "react";
 import axios from "axios"; // Import axios
 import { ArrowRight } from "lucide-react";
 import { getProfile, userLogin, userRegister } from "./store";
-import { showMessage, showPermanentMessage } from "../utils/Message";
+import { showMessage, showPermanentMessage } from "../../utils/Message";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import Link from "next/link";
+// import { isLoggedIn, userProfile } from "./store";
 
 const SignUpOne = () => {
   const dispatch = useDispatch();
-
+  const router = useRouter();
   const [isSignIn, setIsSignIn] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isVisible, setIsVisible] = useState(false);
 
-  // const { loading } = useSelector((state) => state.auth);
+  const { profile, isLoggedIn } = useSelector((state) => state.auth);
 
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const postData = {
-  //       name: name,
-  //       email: email,
-  //       password: password,
-  //       phoneNumber:9999999999
-  //     };
-  //     const response = await axios.post(
-  //       "http://localhost:8080/api/v1/users/register",
-  //       postData
-  //     );
-
-  //     console.log("The Response is ", response);
-  //   } catch (error) {
-  //     console.error("An error occurred:", error);
-  //   }
-  // };
+  console.log("The user Profile is ", profile);
+  console.log("the Logged In User", isLoggedIn);
 
   const handleGoogleLogin = async () => {
     try {
@@ -80,32 +69,42 @@ const SignUpOne = () => {
       userLogin(userData, (error, response) => {
         if (error) {
           showMessage(error.response.data.message, "error");
+          dispatch(
+            getProfile((error, response) => {
+              if (error) {
+                showMessage(error.response.data.message, "error");
+              }
+            })
+          );
           console.error("Login Error:", error);
         } else {
           showMessage(response.message);
-
+          router.push("/");
           console.log("Login Successful:", response);
         }
       })
     );
   };
 
-  useEffect(() => {
-    const handleGetProfile = () => {
-      dispatch(
-        getProfile((error, response) => {
-          if (error) {
-            console.error("Get Profile Error:", error);
-          } else {
-            console.log("Profile Data:", response);
-          }
-        })
-      );
-    };
+  // useEffect(() => {
+  //   const handleGetProfile = () => {
+  //     dispatch(
+  //       getProfile((error, response) => {
+  //         if (error) {
+  //           console.error("Get Profile Error:", error);
+  //         } else {
+  //           console.log("Profile Data:", response);
+  //         }
+  //       })
+  //     );
+  //   };
 
-    handleGetProfile();
-  });
+  //   handleGetProfile();
+  // });
 
+  const handleChangeVisibility = () => {
+    setIsVisible((prev) => !prev);
+  };
   return (
     <section className="sm:w-5/6 sm:m-auto sm:mt-12">
       <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -116,6 +115,7 @@ const SignUpOne = () => {
             alt=""
           />
         </div>
+
         {!isSignIn ? (
           <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
             <div className="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">
@@ -151,23 +151,38 @@ const SignUpOne = () => {
                       >
                         Password
                       </label>
-                      <a
-                        href="#"
+                      <Link
+                        href="/forgetpassword"
                         title=""
                         className="text-sm font-semibold text-black hover:underline"
                       >
                         Forgot password?
-                      </a>
+                      </Link>
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2 flex border rounded-lg ">
                       <input
-                        className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                        type="password"
+                        className="flex h-10 w-full rounded-md bg-transparent px-3 py-2 text-sm outline-none placeholder:text-gray-400 focus:outline-none  focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        type={isVisible ? "text" : "password"}
                         placeholder="Password"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
+                      {!isVisible ? (
+                        <VisibilityIcon
+                          className="my-auto mr-4 cursor-pointer"
+                          onClick={() => {
+                            handleChangeVisibility();
+                          }}
+                        />
+                      ) : (
+                        <VisibilityOffIcon
+                          className="my-auto mr-4 cursor-pointer"
+                          onClick={() => {
+                            handleChangeVisibility();
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                   <div>
@@ -282,15 +297,30 @@ const SignUpOne = () => {
                         Password
                       </label>
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2 flex border rounded-lg ">
                       <input
-                        className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                        type="password"
+                        className="flex h-10 w-full rounded-md bg-transparent px-3 py-2 text-sm outline-none placeholder:text-gray-400 focus:outline-none  focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        type={isVisible ? "text" : "password"}
                         placeholder="Password"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
+                      {!isVisible ? (
+                        <VisibilityIcon
+                          className="my-auto mr-4 cursor-pointer"
+                          onClick={() => {
+                            handleChangeVisibility();
+                          }}
+                        />
+                      ) : (
+                        <VisibilityOffIcon
+                          className="my-auto mr-4 cursor-pointer"
+                          onClick={() => {
+                            handleChangeVisibility();
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                   <div>
